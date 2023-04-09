@@ -78,7 +78,7 @@ Class SearchIndex {
 						if(!is_array($filter)){
 							$filter_type = DataSource::__determineFilterType($filter);
 
-							$value = preg_split('/'.($filter_type == DS_FILTER_AND ? '\+' : '(?<!\\\\),').'\s*/', $filter, -1, PREG_SPLIT_NO_EMPTY);			
+							$value = preg_split('/'.($filter_type == 1 ? '\+' : '(?<!\\\\),').'\s*/', $filter, -1, PREG_SPLIT_NO_EMPTY);			
 							$value = array_map('trim', $value);
 
 							$value = array_map(array('Datasource', 'removeEscapedCommas'), $value);
@@ -100,7 +100,7 @@ Class SearchIndex {
 
 						if($field_id == 'id') $where = " AND `e`.id IN ('".@implode("', '", $value)."') ";
 						else{ 
-							if(!$fieldPool[$field_id]->buildDSRetrievalSQL($value, $joins, $where, ($filter_type == DS_FILTER_AND ? true : false))){ $this->_force_empty_result = true; return; }
+							if(!$fieldPool[$field_id]->buildDSRetrievalSQL($value, $joins, $where, ($filter_type == 1 ? true : false))){ $this->_force_empty_result = true; return; }
 							if(!$group) $group = $fieldPool[$field_id]->requiresSQLGrouping();
 						}
 											
@@ -699,10 +699,10 @@ Class SearchIndex {
 	}
 	
 	public static function strpos($str1, $str2, $pos) {
-		if(function_exists('mb_strpos')) {
-			return mb_strpos($str1, $str2, $pos);
+		if (mb_strlen($str1) <= $pos) {
+			return false;
 		} else {
-			return strpos($str1, $str2, $pos);
+			return mb_strpos($str1, $str2, $pos);
 		}
 	}
 	
